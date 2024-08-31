@@ -31,8 +31,11 @@ font = pygame.font.Font(None, 36)
 stars = [(random.randint(0, width), random.randint(0, height)) for _ in range(100)]
 moon_x, moon_y = random.randint(50, width-50), random.randint(-50, 0)
 
-# Load the shoot sound
-shoot_sound = pygame.mixer.Sound('shoot.wav')  # Make sure to have a 'shoot.wav' file in your project directory
+# Load sounds
+shoot_sound = pygame.mixer.Sound('shoot.wav')
+win_sound = pygame.mixer.Sound('win.wav')
+lose_sound = pygame.mixer.Sound('lose.wav')
+coin_sound = pygame.mixer.Sound('coin.wav')
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, spaceship_choice):
@@ -131,7 +134,12 @@ def draw_space_decorations(player):
 def show_game_over_screen(score):
     screen.fill(black)
     draw_space_decorations(None)
-    game_over_text = font.render("Game Over!", True, white)
+    if score >= 10000:
+        game_over_text = font.render("You Win!", True, white)
+        win_sound.play()
+    else:
+        game_over_text = font.render("Game Over!", True, white)
+        lose_sound.play()
     score_text = font.render(f"Final Score: {score}", True, white)
     restart_text = font.render("Press R to Restart or Q to Quit", True, white)
     
@@ -245,7 +253,7 @@ def main():
                     score += 50 * combo_multiplier
 
         hit_player = pygame.sprite.spritecollideany(player, enemies)
-        if hit_player:
+        if hit_player or score >= 10000:
             if show_game_over_screen(score):
                 spaceship_choice = choose_spaceship()
                 if spaceship_choice is None:
@@ -270,6 +278,7 @@ def main():
         if hit_combo:
             hit_combo.kill()
             combo_multiplier = min(combo_multiplier * 2, max_combo)
+            coin_sound.play()
 
         if random.random() < 0.02:
             enemy = Enemy()
