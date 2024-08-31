@@ -4,6 +4,7 @@ import sys
 import math
 
 pygame.init()
+pygame.mixer.init()  # Initialize the mixer for sound
 
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -30,6 +31,9 @@ font = pygame.font.Font(None, 36)
 stars = [(random.randint(0, width), random.randint(0, height)) for _ in range(100)]
 moon_x, moon_y = random.randint(50, width-50), random.randint(-50, 0)
 
+# Load the shoot sound
+shoot_sound = pygame.mixer.Sound('shoot.wav')  # Make sure to have a 'shoot.wav' file in your project directory
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, spaceship_choice):
         super().__init__()
@@ -51,6 +55,7 @@ class Player(pygame.sprite.Sprite):
         for i in range(combo_multiplier):
             offset = (i - (combo_multiplier - 1) / 2) * 10
             bullets.append(Bullet(self.rect.centerx + offset, self.rect.top))
+        shoot_sound.play()  # Play the shoot sound
         return bullets
 
 class Bullet(pygame.sprite.Sprite):
