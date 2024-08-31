@@ -3,10 +3,8 @@ import random
 import sys
 import math
 
-# Inisialisasi pygame
 pygame.init()
 
-# Warna
 black = (0, 0, 0)
 white = (255, 255, 255)
 blue = (0, 0, 255)
@@ -15,33 +13,28 @@ green = (0, 255, 0)
 yellow = (255, 255, 0)
 gray = (100, 100, 100)
 
-# Ukuran jendela
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Game Tembak-Menembak Luar Angkasa')
+pygame.display.set_caption('Space Shooter Game')
 
-# Variabel game
 clock = pygame.time.Clock()
 fps = 60
 player_speed = 5
 bullet_speed = 7
 enemy_speed = 3
-bullet_delay = 300  # waktu delay dalam milidetik antara tembakan
-max_combo = 32  # Maksimum combo
+bullet_delay = 300
+max_combo = 32
 
-# Font untuk skor
 font = pygame.font.Font(None, 36)
 
-# Dekorasi luar angkasa
 stars = [(random.randint(0, width), random.randint(0, height)) for _ in range(100)]
 moon_x, moon_y = random.randint(50, width-50), random.randint(-50, 0)
 
-# Kelas
 class Player(pygame.sprite.Sprite):
     def __init__(self, spaceship_choice):
         super().__init__()
-        self.image = pygame.image.load(spaceship_choice).convert_alpha()  # Load gambar pesawat dengan alpha channel
-        self.image = pygame.transform.scale(self.image, (50, 50))  # Sesuaikan ukuran
+        self.image = pygame.image.load(spaceship_choice).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (width // 2, height - 50)
         self.speed = player_speed
@@ -63,8 +56,8 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load('bullet.png').convert_alpha()  # Load gambar peluru dengan alpha channel
-        self.image = pygame.transform.scale(self.image, (5, 15))  # Sesuaikan ukuran
+        self.image = pygame.image.load('bullet.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (5, 15))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
@@ -77,8 +70,8 @@ class Bullet(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('enemy.png').convert_alpha()  # Load gambar musuh dengan alpha channel
-        self.image = pygame.transform.scale(self.image, (40, 40))  # Sesuaikan ukuran
+        self.image = pygame.image.load('enemy.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, width - self.rect.width)
         self.rect.y = random.randint(-150, -self.rect.height)
@@ -108,8 +101,8 @@ class Alien(pygame.sprite.Sprite):
 class Combo(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('coin.png').convert_alpha()  # Load gambar koin dengan alpha channel
-        self.image = pygame.transform.scale(self.image, (30, 30))  # Sesuaikan ukuran
+        self.image = pygame.image.load('coin.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, width - self.rect.width)
         self.rect.y = random.randint(-150, -self.rect.height)
@@ -121,12 +114,10 @@ class Combo(pygame.sprite.Sprite):
             self.kill()
 
 def draw_space_decorations(player):
-    # Draw stars
     for i, star in enumerate(stars):
         stars[i] = (star[0], (star[1] + 1) % height)
         pygame.draw.circle(screen, white, stars[i], 1)
     
-    # Draw moon
     global moon_x, moon_y
     moon_y = (moon_y + 0.5) % height
     pygame.draw.circle(screen, gray, (int(moon_x), int(moon_y)), 30)
@@ -232,10 +223,8 @@ def main():
                             all_sprites.add(bullet)
                             bullets.add(bullet)
 
-        # Update
         all_sprites.update()
 
-        # Check for collisions
         for bullet in bullets:
             hit_enemies = pygame.sprite.spritecollide(bullet, enemies, True)
             for enemy in hit_enemies:
@@ -253,7 +242,6 @@ def main():
         hit_player = pygame.sprite.spritecollideany(player, enemies)
         if hit_player:
             if show_game_over_screen(score):
-                # Restart the game
                 spaceship_choice = choose_spaceship()
                 if spaceship_choice is None:
                     running = False
@@ -273,38 +261,32 @@ def main():
                 running = False
             continue
 
-        # Check for combo collisions
         hit_combo = pygame.sprite.spritecollideany(player, combos)
         if hit_combo:
             hit_combo.kill()
             combo_multiplier = min(combo_multiplier * 2, max_combo)
 
-        # Add new enemies
         if random.random() < 0.02:
             enemy = Enemy()
             all_sprites.add(enemy)
             enemies.add(enemy)
 
-        # Add new aliens every 30 seconds
         current_time = pygame.time.get_ticks()
-        if current_time - last_alien_spawn_time > 30000:  # 30 seconds
+        if current_time - last_alien_spawn_time > 30000:
             last_alien_spawn_time = current_time
             alien = Alien()
             all_sprites.add(alien)
             aliens.add(alien)
 
-        # Add new combos
         if random.random() < 0.005:
             combo = Combo()
             all_sprites.add(combo)
             combos.add(combo)
 
-        # Draw
         screen.fill(black)
         draw_space_decorations(player)
         all_sprites.draw(screen)
 
-        # Draw score and combo multiplier
         score_text = font.render(f"Score: {score}", True, white)
         combo_text = font.render(f"Combo: x{combo_multiplier}", True, yellow)
         screen.blit(score_text, (10, 10))
@@ -312,7 +294,6 @@ def main():
 
         pygame.display.flip()
 
-        # Cap the frame rate
         clock.tick(fps)
 
     pygame.quit()
